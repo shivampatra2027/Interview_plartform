@@ -50,8 +50,9 @@ backend/
 ├─ .gitignore
 └─ package.json
 ```
-```
+
 📁 Frontend Structure
+```
 client/
 ├─ src/
 │  ├─ main.jsx                # App entry (ReactDOM)
