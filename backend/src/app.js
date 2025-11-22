@@ -12,7 +12,7 @@ if (NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 app.get("/", (req, res) => {
-  res.json({ message: "AI Interview Backend is running 🚀" });
+  res.json({ message: "AI Interview Backend is running" });
 });
 app.use("/api", routes);
 app.use(errorHandler);
