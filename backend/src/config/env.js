@@ -1,10 +1,14 @@
-// src/config/env.js
 import dotenv from "dotenv";
 dotenv.config();
 
-export const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
-export const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ai-interview";
-export const JWT_SECRET =
-  process.env.JWT_SECRET || process.env.SECRET || "your_super_secret_key";
-export const NODE_ENV = process.env.NODE_ENV || "development";
+if (!process.env.JWT_SECRET) {
+  throw new Error("❌ JWT_SECRET must be defined in .env");
+}
+
+export const JWT_SECRET = process.env.JWT_SECRET;
+
+export const config = {
+  port: process.env.PORT || 5000,
+  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  secretKey: JWT_SECRET,
+};

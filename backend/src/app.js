@@ -1,20 +1,37 @@
 import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
-import morgan from "morgan";
-import { NODE_ENV } from "./config/env.js";
-import routes from "./routes/index.js";
-// import { errorHandler } from "./middlewares/error.middleware.js";
+import cookieParser from "cookie-parser";
+import { connectDB } from "./lib/db.js";
+import authRoutes from "./routes/auth.routes.js";
+import { config } from "./config/env.js";
+dotenv.config();
+const PORT = process.env.PORT || 5001;
+
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-if (NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
-app.get("/", (_, res) => {
-  res.json({ message: "AI Interview Backend is running" });
-});
-app.use("/api", routes);
-// app.use(errorHandler);
+const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:5173"];
 
-export default app;
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+app.use(express.json());
+app.use("/api/auth", authRoutes);
+app.get("/", (req, res) => {
+  res.send("Server Already Running.");
+});
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is live at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Error connecting the DB..", err.message);
+    process.exit(1);
+  });

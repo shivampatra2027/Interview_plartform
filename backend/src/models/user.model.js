@@ -4,24 +4,15 @@ import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: True,
+    required: true,
   },
   email: {
     type: String,
-    required: True,
+    required: true,
   },
   password: {
     type: String,
-    required: True,
-  },
-  role: {
-    type: String,
-    enum: ["admin", "user"],
-    default: "user",
-  },
-  avatarUrl: {
-    type: String,
-    default: "",
+    required: true,
   },
 },{timestamps:true});
 export const User = mongoose.model("User", userSchema);
