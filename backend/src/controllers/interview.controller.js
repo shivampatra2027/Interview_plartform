@@ -102,8 +102,6 @@ export const submitAnswer = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Invalid question index" });
     }
-
-    // push or update answer
     const existingIndex = interview.answers.findIndex(
       (a) => a.questionIndex === questionIndex
     );
@@ -123,8 +121,6 @@ export const submitAnswer = async (req, res, next) => {
         ...answerPayload,
       };
     }
-
-    // move pointer
     interview.currentQuestionIndex = questionIndex + 1;
 
     await interview.save();
@@ -160,7 +156,6 @@ export const completeInterview = async (req, res, next) => {
     }
 
     if (interview.status === "completed") {
-      // already has a report?
       const existingReport = await Report.findOne({
         interview: interview._id,
         user: req.user._id,
