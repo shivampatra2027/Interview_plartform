@@ -2,7 +2,7 @@
 // src/routes/interview.routes.js
 
 import { Router } from "express";
-import { authRequired } from "../middlewares/auth.middleware.js";
+import  authRequired  from "../middlewares/auth.middleware.js";
 
 import {
   createInterview,

@@ -1,3 +1,4 @@
+// src/models/report.model.js
 import mongoose from "mongoose";
 
 const skillScoreSchema = new mongoose.Schema(
@@ -52,10 +53,12 @@ const reportSchema = new mongoose.Schema(
 
     rawAiFeedback: {
       type: String,
-      default: "", 
+      default: "",
     },
   },
   { timestamps: true }
 );
 
-export const Report = mongoose.model("Report", reportSchema);
+// ⬅️ THIS IS THE IMPORTANT FIX
+const ReportModel = mongoose.model("Report", reportSchema);
+export default ReportModel;
