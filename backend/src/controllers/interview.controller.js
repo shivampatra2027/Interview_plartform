@@ -1,7 +1,7 @@
 // src/controllers/interview.controller.js
 
-import { InterviewSession } from "../models/interviewSession.model.js";
-import { Report } from "../models/report.model.js";
+import  InterviewSession  from "../models/interviewSession.model.js";
+import  Report  from "../models/report.model.js";
 import { success } from "../utils/response.js";
 import {
   generateQuestionsForPosition,

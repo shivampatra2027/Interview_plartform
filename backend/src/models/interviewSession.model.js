@@ -1,3 +1,4 @@
+// src/models/interviewSession.model.js
 import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema(
@@ -9,18 +10,18 @@ const questionSchema = new mongoose.Schema(
       enum: ["easy", "medium", "hard"],
       default: "medium",
     },
-    aiHint: { type: String, default: "" }, 
+    aiHint: { type: String, default: "" },
   },
   { _id: false }
 );
 
 const answerSchema = new mongoose.Schema(
   {
-    questionIndex: { type: Number, required: true }, 
-    text: { type: String, default: "" }, 
-    transcript: { type: String, default: "" }, 
+    questionIndex: { type: Number, required: true },
+    text: { type: String, default: "" },
+    transcript: { type: String, default: "" },
     score: { type: Number, min: 0, max: 10, default: null },
-    feedback: { type: String, default: "" }, 
+    feedback: { type: String, default: "" },
     respondedAt: { type: Date, default: Date.now },
   },
   { _id: false }
@@ -41,7 +42,7 @@ const interviewSessionSchema = new mongoose.Schema(
 
     position: {
       type: String,
-      default: "", 
+      default: "",
     },
 
     difficultyLevel: {
@@ -89,7 +90,19 @@ const interviewSessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const InterviewSession = mongoose.model(
+// Create model and export as default so `import InterviewModel from './interviewSession.model.js'` works.
+const InterviewSession = mongoose.model(
   "InterviewSession",
   interviewSessionSchema
 );
+export default InterviewSession;
+
+// src/services/ai.service.js
+export function evaluateInterviewAnswers(answers) {
+  // Example logic: score answers
+  return answers.map(ans => ({
+    ...ans,
+    score: ans.text.length > 0 ? 7 : 0,
+    feedback: ans.text.length > 0 ? "Good attempt" : "No answer provided"
+  }));
+}

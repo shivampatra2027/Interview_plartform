@@ -1,8 +1,5 @@
-//ai.service
 // src/services/ai.service.js
 // ESM version: STT -> LLM -> TTS orchestration for press-to-answer flow.
-// Replace the provider stubs (callSTT_file, callLLM_evaluate, callTTS_textToBase64)
-// with real SDK/HTTP calls for production.
 
 import fs from "fs";
 import path from "path";
@@ -17,6 +14,9 @@ import ReportModel from "../models/report.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/* --------------------
+   Utility: Save Base64 audio to temp file
+-------------------- */
 function saveBase64ToTmp(base64, ext = "webm") {
   const buffer = Buffer.from(base64, "base64");
   const filename = `${uuidv4()}.${ext}`;
@@ -28,19 +28,16 @@ function saveBase64ToTmp(base64, ext = "webm") {
 }
 
 /* --------------------
-   PROVIDER STUBS - Replace these with real implementations
-   -------------------- */
+   PROVIDER STUBS (Replace with real APIs)
+-------------------- */
 
+// STT
 export async function callSTT_file(filepath) {
-  // Replace with AssemblyAI / Deepgram / OpenAI Whisper / provider code
-  // Should return: { text: "transcript text" }
   return { text: "placeholder transcript - implement callSTT_file" };
 }
 
+// LLM (Evaluation + next question)
 export async function callLLM_evaluate({ role, difficulty, questionText, userTranscript }) {
-  // Replace with LLM (OpenAI / Anthropic / etc.) call that returns structured JSON.
-  // Expected return shape:
-  // { feedback, scores: { correctness, depth, communication }, overallScore, nextQuestion }
   return {
     feedback: "Good structure; include more concrete examples and edge-case discussion.",
     scores: { correctness: 7, depth: 6, communication: 8 },
@@ -49,39 +46,40 @@ export async function callLLM_evaluate({ role, difficulty, questionText, userTra
   };
 }
 
+// TTS
 export async function callTTS_textToBase64(text, voice = "default") {
-  // Replace with TTS provider (ElevenLabs, Google TTS, AWS Polly, Azure, etc.)
-  // Should return a base64-encoded audio string (wav/mp3)
-  // For now return a tiny silent wav base64 so frontend won't error on audio playback
   const silentWav = "UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
   return silentWav;
 }
 
 /* --------------------
-   CORE ORCHESTRATION
-   -------------------- */
-
+   CORE: Process User Audio
+-------------------- */
 export async function processUserAudio({ interviewId, audioBase64, audioExt = "webm" }) {
   if (!interviewId || !audioBase64) {
     throw new Error("processUserAudio: interviewId and audioBase64 required");
   }
 
   const tmpFile = saveBase64ToTmp(audioBase64, audioExt);
+
   try {
-    // 1) Transcribe audio
+    // 1) STT
     const sttResult = await callSTT_file(tmpFile);
     const transcript = sttResult?.text?.trim() ?? "";
 
-    // 2) Get last question in this interview
-    const lastQuestion = await QuestionModel.findOne({ interview: interviewId }).sort({ orderIndex: -1 }).lean();
+    // 2) Get last question
+    const lastQuestion = await QuestionModel.findOne({ interview: interviewId })
+      .sort({ orderIndex: -1 })
+      .lean();
+
     const questionText = lastQuestion?.text ?? "";
 
-    // 3) Prepare interview metadata
+    // 3) Interview meta
     const interview = await InterviewModel.findById(interviewId).lean();
     const role = interview?.role ?? "General";
     const difficulty = interview?.difficulty ?? "medium";
 
-    // 4) LLM evaluation & next question
+    // 4) LLM evaluation
     const llmResp = await callLLM_evaluate({
       role,
       difficulty,
@@ -91,13 +89,14 @@ export async function processUserAudio({ interviewId, audioBase64, audioExt = "w
 
     const feedback = llmResp.feedback ?? "No feedback provided";
     const scores = llmResp.scores ?? { correctness: 0, depth: 0, communication: 0 };
+
     const overallScore = (typeof llmResp.overallScore === "number")
       ? llmResp.overallScore
       : Math.round(((scores.correctness || 0) + (scores.depth || 0) + (scores.communication || 0)) / 3);
 
-    const nextQuestionText = llmResp.nextQuestion || "Thank you — next question.";
+    const nextQuestionText = llmResp.nextQuestion ?? "Thank you — next question.";
 
-    // 5) Persist Answer
+    // 5) Save answer
     const answerDoc = await AnswerModel.create({
       interview: interviewId,
       question: lastQuestion ? lastQuestion._id : null,
@@ -108,8 +107,9 @@ export async function processUserAudio({ interviewId, audioBase64, audioExt = "w
       createdAt: new Date()
     });
 
-    // 6) Persist next question
+    // 6) Save next question
     const nextIndex = lastQuestion ? lastQuestion.orderIndex + 1 : 0;
+
     const nextQuestionDoc = await QuestionModel.create({
       interview: interviewId,
       text: nextQuestionText,
@@ -118,7 +118,7 @@ export async function processUserAudio({ interviewId, audioBase64, audioExt = "w
       createdAt: new Date()
     });
 
-    // 7) TTS feedback + next question
+    // 7) Generate AI audio for feedback + next question
     const speechText = `Feedback: ${feedback}. Next question: ${nextQuestionText}`;
     const aiAudioBase64 = await callTTS_textToBase64(speechText);
 
@@ -133,13 +133,21 @@ export async function processUserAudio({ interviewId, audioBase64, audioExt = "w
       aiAudioBase64
     };
   } finally {
-    // cleanup tmp file
-    try { fs.unlinkSync(tmpFile); } catch (e) { /* ignore */ }
+    try { fs.unlinkSync(tmpFile); } catch {}
   }
 }
 
+/* --------------------
+   Wrapper (Fix for controller import)
+-------------------- */
+export async function evaluateInterviewAnswers({ interviewId, audioBase64, audioExt = "webm" }) {
+  return await processUserAudio({ interviewId, audioBase64, audioExt });
+}
+
+/* --------------------
+   Initial Question
+-------------------- */
 export async function generateInitialQuestion({ interviewId, role = "General", difficulty = "medium" }) {
-  // Option A: call LLM to generate initial question
   const llmResp = await callLLM_evaluate({
     role,
     difficulty,
@@ -147,7 +155,9 @@ export async function generateInitialQuestion({ interviewId, role = "General", d
     userTranscript: ""
   });
 
-  const initialQuestionText = llmResp.nextQuestion || "Tell me about your recent projects and responsibilities.";
+  const initialQuestionText =
+    llmResp.nextQuestion || "Tell me about your recent projects and responsibilities.";
+
   const questionDoc = await QuestionModel.create({
     interview: interviewId,
     text: initialQuestionText,
@@ -157,6 +167,7 @@ export async function generateInitialQuestion({ interviewId, role = "General", d
   });
 
   const aiAudioBase64 = await callTTS_textToBase64(initialQuestionText);
+
   return {
     questionId: questionDoc._id,
     questionText: initialQuestionText,
@@ -164,27 +175,27 @@ export async function generateInitialQuestion({ interviewId, role = "General", d
   };
 }
 
+/* --------------------
+   Final Report
+-------------------- */
 export async function generateFinalReport(interviewId) {
   if (!interviewId) throw new Error("generateFinalReport: interviewId required");
 
   const answers = await AnswerModel.find({ interview: interviewId }).lean();
 
-  const avgScore = answers.length === 0
-    ? 0
-    : Math.round(
-        (answers.reduce((s, a) => s + (a.score || 0), 0) / answers.length) * 10
-      ) / 10;
+  const avgScore =
+    answers.length === 0
+      ? 0
+      : Math.round(
+          (answers.reduce((s, a) => s + (a.score || 0), 0) / answers.length) * 10
+        ) / 10;
 
-  // Ideally we call an LLM summarizer here; for now produce a fallback summary
-  // Build a simple prompt payload (you would pass this to LLM summarization)
-  const summaryPayload = answers.map((a, i) => {
-    return `Q${i + 1}: ${a.question ? a.question.toString() : "(id:"+a.question+")"}\nAnswer: ${a.userTranscript || ""}\nFeedback: ${a.aiFeedback || ""}\nScore: ${a.score || 0}\n`;
-  }).join("\n\n");
-
-  // Replace below with call to LLM summarization
   const strengths = ["Clear communication", "Reasonable problem approach"];
   const weaknesses = ["Provide more concrete examples", "Consider edge cases"];
-  const recommendations = ["Practice coding problems with unit tests", "Revise database joins and normalization"];
+  const recommendations = [
+    "Practice coding problems with unit tests",
+    "Revise database joins and normalization"
+  ];
 
   const reportDoc = await ReportModel.create({
     interview: interviewId,
@@ -195,7 +206,21 @@ export async function generateFinalReport(interviewId) {
     createdAt: new Date()
   });
 
-  await InterviewModel.findByIdAndUpdate(interviewId, { overallScore: avgScore, endedAt: new Date() });
+  await InterviewModel.findByIdAndUpdate(interviewId, {
+    overallScore: avgScore,
+    endedAt: new Date()
+  });
 
   return reportDoc;
+}
+// Generate questions for a chosen role/position (stub)
+export async function generateQuestionsForPosition(role = "General", difficulty = "medium") {
+  // Replace with LLM call in future
+  const questions = [
+    `What do you know about ${role}?`,
+    `Explain a recent project where you applied ${role} skills.`,
+    `What challenges do you face in ${role} roles?`
+  ];
+
+  return questions;
 }

@@ -4,20 +4,21 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import  connectDB  from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
+import interviewRoutes from "./routes/interview.routes.js";
 import { config } from "./config/env.js";
 dotenv.config();
 const PORT = process.env.PORT || 5001;
 
 
 const app = express();
-// const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:5173"];
+const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:5173"];
 
-// app.use(
-//   cors({
-//     origin: allowedOrigins,
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
