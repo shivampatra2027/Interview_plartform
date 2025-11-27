@@ -51,7 +51,7 @@ export default function DashboardPage() {
               className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5" />
-              <span className="text-sm font-medium">Logout</span>
+              
             </button>
           </div>
         </div>
