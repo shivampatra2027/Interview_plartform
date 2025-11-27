@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Mic, 
@@ -6,9 +6,6 @@ import {
   BarChart3, 
   CheckCircle2, 
   Play, 
-  Menu, 
-  X, 
-  ChevronRight, 
   Cpu,
   Shield,
   Zap,
@@ -26,87 +23,11 @@ import {
 
 // --- Components ---
 
-const Navbar = () => {
-  const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-white/80 backdrop-blur-xl shadow-2xl shadow-purple-500/10 border-b border-purple-100/20' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex items-center">
-            <div className="shrink-0 flex items-center gap-3">
-              <div className="w-11 h-11 bg-linear-to-br from-purple-600 via-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-300 hover:scale-110">
-                <Brain className="text-white w-6 h-6" />
-              </div>
-              <span className={`font-black text-2xl tracking-tight transition-colors ${scrolled ? 'text-slate-900' : 'text-white'}`}>
-                Interview<span className="bg-linear-to-r from-purple-600 via-pink-500 to-blue-600 bg-clip-text text-transparent">Master</span>
-              </span>
-            </div>
-            <div className="hidden md:block">
-              <div className="ml-12 flex items-baseline space-x-8">
-                <a href="#features" className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${scrolled ? 'text-slate-700 hover:text-purple-600' : 'text-white/90 hover:text-white'}`}>Features</a>
-                <a href="#how-it-works" className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${scrolled ? 'text-slate-700 hover:text-purple-600' : 'text-white/90 hover:text-white'}`}>How it Works</a>
-                <a href="#testimonials" className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${scrolled ? 'text-slate-700 hover:text-purple-600' : 'text-white/90 hover:text-white'}`}>Testimonials</a>
-                <a href="#pricing" className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${scrolled ? 'text-slate-700 hover:text-purple-600' : 'text-white/90 hover:text-white'}`}>Pricing</a>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/login')}
-              className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${scrolled ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'}`}
-            >
-              Sign In
-            </button>
-            <button 
-              onClick={() => navigate('/login')}
-              className="relative bg-linear-to-r from-purple-600 via-purple-500 to-blue-600 hover:from-purple-700 hover:via-purple-600 hover:to-blue-700 text-white px-7 py-3 rounded-xl font-bold transition-all transform hover:scale-105 shadow-xl shadow-purple-500/40 hover:shadow-2xl hover:shadow-purple-500/60 before:absolute before:inset-0 before:rounded-xl before:bg-white/20 before:opacity-0 hover:before:opacity-100 before:transition-opacity"
-            >
-              Get Started
-            </button>
-          </div>
-          <div className="-mr-2 flex md:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className={scrolled ? 'text-slate-900' : 'text-white'}>
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 shadow-xl">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="#features" className="text-slate-700 hover:bg-slate-50 block px-3 py-2 rounded-md text-base font-medium">Features</a>
-            <a href="#how-it-works" className="text-slate-700 hover:bg-slate-50 block px-3 py-2 rounded-md text-base font-medium">How it Works</a>
-            <a href="#testimonials" className="text-slate-700 hover:bg-slate-50 block px-3 py-2 rounded-md text-base font-medium">Testimonials</a>
-            <a href="#pricing" className="text-slate-700 hover:bg-slate-50 block px-3 py-2 rounded-md text-base font-medium">Pricing</a>
-            <button 
-              onClick={() => navigate('/login')}
-              className="w-full text-left bg-linear-to-r from-purple-600 to-blue-600 text-white block px-3 py-3 rounded-lg text-base font-medium mt-4"
-            >
-              Get Started Free
-            </button>
-          </div>
-        </div>
-      )}
-    </nav>
-  );
-};
-
 const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-32">
+    <div className="relative bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden pt-24 pb-24 lg:pt-32 lg:pb-32">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-purple-600/30 blur-[140px] animate-pulse" />
@@ -627,7 +548,6 @@ const Footer = () => {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
-      <Navbar />
       <Hero />
       <Features />
       <HowItWorks />
