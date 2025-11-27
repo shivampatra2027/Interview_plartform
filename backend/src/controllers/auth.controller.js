@@ -64,7 +64,7 @@ export const login = async (req, res,next) => {
                 message: "User not found in the database..kindly register first!"
             });
         }
-        const isMatch = await user.isPassword(password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
                 success: false,
