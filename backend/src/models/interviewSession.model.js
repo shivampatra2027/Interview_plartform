@@ -47,8 +47,8 @@ const interviewSessionSchema = new mongoose.Schema(
 
     difficultyLevel: {
       type: String,
-      enum: ["beginner", "intermediate", "advanced"],
-      default: "beginner",
+      enum: ["beginner", "easy", "medium", "hard", "advanced"], 
+      default: "beginner"
     },
 
     status: {

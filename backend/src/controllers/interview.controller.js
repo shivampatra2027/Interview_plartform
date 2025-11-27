@@ -12,17 +12,23 @@ export const createInterview = async (req, res, next) => {
   try {
     const { title, position, difficultyLevel, questionCount = 5 } = req.body;
 
-    const questions = await generateQuestionsForPosition({
+    // normalize difficulty
+    const allowedLevels = ["beginner", "easy", "hard", "advanced"];
+    const level = allowedLevels.includes(difficultyLevel) ? difficultyLevel : "beginner";
+
+    // generate questions and wrap in objects
+    const rawQuestions = await generateQuestionsForPosition({
       position: position || "Software Developer",
-      difficultyLevel: difficultyLevel || "beginner",
+      difficultyLevel: level,
       count: questionCount,
     });
+    const questions = rawQuestions.map(q => ({ text: q }));
 
     const interview = await InterviewSession.create({
-      user: req.user._id,
+      user: req.user._id, // ensure req.user is set correctly
       title: title || "Mock Interview",
       position: position || "",
-      difficultyLevel: difficultyLevel || "beginner",
+      difficultyLevel: level,
       status: "scheduled",
       questions,
       answers: [],

@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
   });
 });
 router.use("/auth", authRoutes);
-router.use("/interviews", interviewRoutes);
+router.use("/interview", interviewRoutes);
 router.use("/reports", reportRoutes);
 
 export default router;

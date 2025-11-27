@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
   res.send("Server Already Running.");
 });
 app.use("/api",apiRouter);
+app.use("/api/interview", interviewRoutes);
 
 connectDB()
   .then(() => {
