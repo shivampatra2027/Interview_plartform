@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.56.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.5",
     "@tabler/icons-react": "^3.35.0",
     "@tailwindcss/vite": "^4.1.17",
     "lucide-react": "^0.554.0",

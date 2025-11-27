@@ -20,9 +20,8 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react';
-
 // --- Components ---
-
+import { ChevronRight } from 'lucide-react';
 const Hero = () => {
   const navigate = useNavigate();
 
