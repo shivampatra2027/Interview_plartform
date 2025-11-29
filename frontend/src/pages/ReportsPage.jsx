@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -10,11 +10,31 @@ import {
   Target,
   Award,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { reportsAPI } from '../api';
+import { useAPI } from '../hooks/useAPI';
 
 export default function ReportsPage() {
   const navigate = useNavigate();
+  const { callAPI, loading } = useAPI();
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await callAPI(reportsAPI.listUserReports);
+        if (response?.data?.reports) {
+          setReports(response.data.reports);
+        }
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      }
+    };
+
+    fetchReports();
+  }, [callAPI]);
 
   const overallScore = 85;
   const metrics = [
@@ -41,6 +61,17 @@ export default function ReportsPage() {
     { date: '2024-11-18', role: 'Product Manager', score: 78, duration: '38 min' },
     { date: '2024-11-15', role: 'Data Scientist', score: 92, duration: '52 min' }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Loading reports...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950">
