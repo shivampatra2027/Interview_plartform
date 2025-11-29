@@ -1,19 +1,16 @@
-// src/controllers/report.controller.js
 import mongoose from "mongoose";
 import Report from "../models/report.model.js";
 import { success } from "../utils/response.js";
 
 const { Types: { ObjectId } } = mongoose;
+
 function sanitizeId(rawId) {
   if (!rawId) return null;
   let s = String(rawId).trim();
-  // remove leading colons like ":6929..."
   s = s.replace(/^:+/, "").trim();
   if (/^[0-9a-fA-F]{24}$/.test(s)) return s;
   const match = s.match(/([0-9a-fA-F]{24})$/);
   if (match) return match[1];
-
-  
   return s;
 }
 
@@ -24,8 +21,8 @@ function isValidObjectIdString(idStr) {
 export const generateReport = async (req, res, next) => {
   try {
     const { interviewId: rawInterviewId, summary, score, details } = req.body;
+    const { userId } = req.auth();   
 
-    // sanitize and validate interviewId if provided
     let interviewId = null;
     if (rawInterviewId) {
       const cleaned = sanitizeId(rawInterviewId);
@@ -36,7 +33,7 @@ export const generateReport = async (req, res, next) => {
     }
 
     const newReport = await Report.create({
-      user: req.auth.userId,
+      user: userId,   
       interview: interviewId,
       summary: summary || "",
       overallScore: score ?? null,
@@ -51,7 +48,7 @@ export const generateReport = async (req, res, next) => {
 
 export const getMyReport = async (req, res, next) => {
   try {
-    const userId = req.auth?.userId;
+    const { userId } = req.auth();   
     if (!userId) {
       return res.status(400).json({ success: false, message: "User ID not found in request" });
     }
@@ -68,6 +65,7 @@ export const getMyReport = async (req, res, next) => {
 
 export const getReportById = async (req, res, next) => {
   try {
+    const { userId } = req.auth();
     const { id: rawId } = req.params;
     const cleaned = sanitizeId(rawId);
 
@@ -76,7 +74,7 @@ export const getReportById = async (req, res, next) => {
     }
     const id = new ObjectId(cleaned);
 
-    const report = await Report.findOne({ _id: id, user: req.auth.userId }).populate("interview");
+    const report = await Report.findOne({ _id: id, user: userId }).populate("interview");
     if (!report) {
       return res.status(404).json({ success: false, message: "No report found!" });
     }
@@ -85,9 +83,10 @@ export const getReportById = async (req, res, next) => {
     next(error);
   }
 };
+
 export const getReportForInterview = async (req, res, next) => {
   try {
-    
+    const { userId } = req.auth();   
     const rawInterviewId = req.params.interviewId ?? req.params.id ?? req.query.interviewId ?? req.query.interview;
     if (!rawInterviewId) {
       return res.status(400).json({ success: false, message: "Interview ID is required" });
@@ -100,7 +99,7 @@ export const getReportForInterview = async (req, res, next) => {
     }
     const interviewObjectId = new ObjectId(cleaned);
 
-    const reports = await Report.find({ interview: interviewObjectId, user: req.auth.userId })
+    const reports = await Report.find({ interview: interviewObjectId, user: userId })
       .populate("interview", "title position difficultyLevel status overallScore")
       .sort({ createdAt: -1 });
 
@@ -112,7 +111,8 @@ export const getReportForInterview = async (req, res, next) => {
 
 export const listUserReports = async (req, res, next) => {
   try {
-    const reports = await Report.find({ user: req.auth.userId })
+    const { userId } = req.auth();   
+    const reports = await Report.find({ user: userId })
       .populate("interview", "title position difficultyLevel status overallScore")
       .sort({ createdAt: -1 });
 
