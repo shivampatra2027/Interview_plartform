@@ -25,7 +25,7 @@ export const createInterview = async (req, res, next) => {
     const questions = rawQuestions.map(q => ({ text: q }));
 
     const interview = await InterviewSession.create({
-      user: req.user._id, // ensure req.user is set correctly
+      user: req.auth.userId, // ensure req.user is set correctly
       title: title || "Mock Interview",
       position: position || "",
       difficultyLevel: level,
@@ -47,7 +47,7 @@ export const startInterview = async (req, res, next) => {
 
     const interview = await InterviewSession.findOne({
       _id: id,
-      user: req.user._id,
+      user: req.auth.userId,
     });
 
     if (!interview) {
@@ -84,7 +84,7 @@ export const submitAnswer = async (req, res, next) => {
 
     const interview = await InterviewSession.findOne({
       _id: id,
-      user: req.user._id,
+      user: req.auth.userId,
     });
 
     if (!interview) {
@@ -154,7 +154,7 @@ export const completeInterview = async (req, res, next) => {
 
     let interview = await InterviewSession.findOne({
       _id: id,
-      user: req.user._id,
+      user: req.auth.userId,
     });
 
     if (!interview) {
@@ -166,7 +166,7 @@ export const completeInterview = async (req, res, next) => {
     if (interview.status === "completed") {
       const existingReport = await Report.findOne({
         interview: interview._id,
-        user: req.user._id,
+        user: req.auth.userId,
       });
       return success(
         res,
@@ -202,7 +202,7 @@ export const completeInterview = async (req, res, next) => {
     // Create report
     const report = await Report.create({
       interview: interview._id,
-      user: req.user._id,
+      user: req.auth.userId,
       overallScore: interview.overallScore,
       strengths: strengths || [],
       weaknesses: weaknesses || [],
@@ -233,7 +233,7 @@ export const completeInterview = async (req, res, next) => {
 export const getMyInterviews = async (req, res, next) => {
   try {
     const interviews = await InterviewSession.find({
-      user: req.user._id,
+      user: req.auth.userId,
     })
       .sort({ createdAt: -1 })
       .select("-answers.rawAiFeedback");
@@ -250,7 +250,7 @@ export const getInterviewById = async (req, res, next) => {
 
     const interview = await InterviewSession.findOne({
       _id: id,
-      user: req.user._id,
+      user: req.auth.userId,
     }).populate("report");
 
     if (!interview) {

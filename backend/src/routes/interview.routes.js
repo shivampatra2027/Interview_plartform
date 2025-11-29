@@ -2,7 +2,7 @@
 // src/routes/interview.routes.js
 
 import { Router } from "express";
-import  authRequired  from "../middlewares/auth.middleware.js";
+import { requireAuth } from "../middlewares/clerk.middleware.js";
 
 import {
   createInterview,
@@ -14,21 +14,21 @@ import {
 } from "../controllers/interview.controller.js";
 
 const router = Router();
-router.use(authRequired);
+router.use(requireAuth);
 router.post("/", createInterview);
 router.get("/", getMyInterviews);
-router.get("/interview/debug-user", authRequired, (req, res) => {
-  console.log("req.user:", req.user);
-  res.json({ user: req.user });
+router.get("/interview/debug-user", (req, res) => {
+  console.log("req.auth:", req.auth);
+  res.json({ auth: req.auth });
 });
 
 router.get("/:id", getInterviewById);
 router.post("/:id/start", startInterview);
 router.post("/:id/answer", submitAnswer);
 router.post("/:id/complete", completeInterview);
-router.get("/debug-user", authRequired, (req, res) => {
-  console.log("req.user:", req.user);
-  res.json({ user: req.user });
+router.get("/debug-user", (req, res) => {
+  console.log("req.auth:", req.auth);
+  res.json({ auth: req.auth });
 });
 
 export default router;
