@@ -36,7 +36,7 @@ export const generateReport = async (req, res, next) => {
     }
 
     const newReport = await Report.create({
-      user: req.user._id,
+      user: req.auth.userId,
       interview: interviewId,
       summary: summary || "",
       overallScore: score ?? null,
@@ -51,7 +51,7 @@ export const generateReport = async (req, res, next) => {
 
 export const getMyReport = async (req, res, next) => {
   try {
-    const userId = req.user && req.user._id ? req.user._id : null;
+    const userId = req.auth?.userId;
     if (!userId) {
       return res.status(400).json({ success: false, message: "User ID not found in request" });
     }
@@ -76,7 +76,7 @@ export const getReportById = async (req, res, next) => {
     }
     const id = new ObjectId(cleaned);
 
-    const report = await Report.findOne({ _id: id, user: req.user._id }).populate("interview");
+    const report = await Report.findOne({ _id: id, user: req.auth.userId }).populate("interview");
     if (!report) {
       return res.status(404).json({ success: false, message: "No report found!" });
     }
@@ -100,7 +100,7 @@ export const getReportForInterview = async (req, res, next) => {
     }
     const interviewObjectId = new ObjectId(cleaned);
 
-    const reports = await Report.find({ interview: interviewObjectId, user: req.user._id })
+    const reports = await Report.find({ interview: interviewObjectId, user: req.auth.userId })
       .populate("interview", "title position difficultyLevel status overallScore")
       .sort({ createdAt: -1 });
 
@@ -112,7 +112,7 @@ export const getReportForInterview = async (req, res, next) => {
 
 export const listUserReports = async (req, res, next) => {
   try {
-    const reports = await Report.find({})
+    const reports = await Report.find({ user: req.auth.userId })
       .populate("interview", "title position difficultyLevel status overallScore")
       .sort({ createdAt: -1 });
 

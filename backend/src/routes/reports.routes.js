@@ -8,12 +8,12 @@ import {
   listUserReports
 } from "../controllers/report.controller.js";
 
-import authMiddleware from "../middlewares/auth.middleware.js"; 
+import { requireAuth } from "../middlewares/clerk.middleware.js"; 
 
 const router = express.Router();
-router.post("/generate", authMiddleware, generateReport);
-router.get("/", authMiddleware, listUserReports);
-router.get("/:reportId", authMiddleware, getReportById);
-router.get("/interview/:interviewId", authMiddleware, getReportForInterview);
+router.post("/generate", requireAuth, generateReport);
+router.get("/", requireAuth, listUserReports);
+router.get("/:reportId", requireAuth, getReportById);
+router.get("/interview/:interviewId", requireAuth, getReportForInterview);
 
 export default router;

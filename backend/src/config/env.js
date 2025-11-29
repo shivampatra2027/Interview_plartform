@@ -10,5 +10,7 @@ export const JWT_SECRET = process.env.JWT_SECRET;
 export const config = {
   jwtSecret: process.env.JWT_SECRET,
   port: process.env.PORT || 5000,
-  clientUrl: process.env.CLIENT_URL || "http://localhost:5173"
+  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+  clerkSecretKey: process.env.CLERK_SECRET_KEY
 };

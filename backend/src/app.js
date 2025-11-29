@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { clerkMiddleware } from '@clerk/express';
 
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -24,6 +25,9 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+
+// Clerk middleware - must be before routes
+app.use(clerkMiddleware());
 
 // REST routes
 app.use("/api/auth", authRoutes);
