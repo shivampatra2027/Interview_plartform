@@ -158,7 +158,8 @@ const Hero = () => {
   );
 };
 
-const FeatureCard = ({ icon: IconComponent, title, description, gradient }) => {
+const FeatureCard = ({ icon, title, description, gradient }) => {
+  const IconComponent = icon;
   return (
     <div className="group relative p-8 rounded-3xl bg-white border-2 border-slate-200 hover:border-purple-300 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-200/60 hover:-translate-y-2">
       <div className={`w-16 h-16 rounded-2xl ${gradient} flex items-center justify-center mb-6 shadow-xl shadow-purple-500/30 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
